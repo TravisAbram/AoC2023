@@ -7,13 +7,14 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
 func main() {
 	fileLines := getLines("input1")
 
-	total := 0
+	part1 := 0
 	for pos, line := range fileLines {
 		first, err := findFirstDigit(line)
 		if err != nil {
@@ -32,11 +33,36 @@ func main() {
 			log.Fatal(pos, err)
 		}
 
-		total += value
+		part1 += value
 	}
 
-	fmt.Println("Part 1:", total)
+	fmt.Println("Part 1:", part1)
 
+	part2 := 0
+	for pos, line := range fileLines {
+		line = replaceDigitWords(line)
+
+		first, err := findFirstDigit(line)
+		if err != nil {
+			log.Fatal(pos, err)
+		}
+
+		last, err := findLastDigit(line)
+		if err != nil {
+			log.Fatal(pos, err)
+		}
+
+		combined := fmt.Sprintf("%s%s", string(first), string(last))
+
+		value, err := strconv.Atoi(combined)
+		if err != nil {
+			log.Fatal(pos, err)
+		}
+
+		part2 += value
+	}
+
+	fmt.Println("Part 2:", part2)
 }
 
 func getLines(file string) []string {
@@ -75,4 +101,20 @@ func findLastDigit(line string) (int, error) {
 		}
 	}
 	return 0, errors.New("no digit found")
+}
+
+func replaceDigitWords(line string) string {
+	fixedLine := ""
+
+	fixedLine = strings.Replace(line, "one", "o1e", -1)
+	fixedLine = strings.Replace(fixedLine, "two", "t2o", -1)
+	fixedLine = strings.Replace(fixedLine, "three", "t3e", -1)
+	fixedLine = strings.Replace(fixedLine, "four", "f4r", -1)
+	fixedLine = strings.Replace(fixedLine, "five", "f5e", -1)
+	fixedLine = strings.Replace(fixedLine, "six", "s6x", -1)
+	fixedLine = strings.Replace(fixedLine, "seven", "s7n", -1)
+	fixedLine = strings.Replace(fixedLine, "eight", "e8t", -1)
+	fixedLine = strings.Replace(fixedLine, "nine", "n9e", -1)
+
+	return fixedLine
 }
