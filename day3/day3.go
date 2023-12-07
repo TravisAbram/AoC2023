@@ -23,12 +23,21 @@ type Part struct {
 	scanXStart int
 	scanXEnd   int
 	valid      bool
+	nearGear   bool
+}
+
+type Gear struct {
+	x      int
+	y      int
+	count  int
+	values []int
 }
 
 func main() {
 	fileLines := getLines("input")
 
 	fmt.Println("Part 1:", part1(fileLines))
+	fmt.Println("Part 2:", part2(fileLines))
 }
 
 func part1(lines []string) int {
@@ -37,6 +46,61 @@ func part1(lines []string) int {
 	parts = validate(parts, lines)
 	total := calculateTotal(parts)
 	return total
+}
+
+func part2(lines []string) int {
+	parts := buildParts(lines)
+	parts = setScanRanges(parts, lines)
+	gears := findGears(lines)
+	parts = nearGear(parts, lines)
+	gears = gearCountAndTotal(parts, gears)
+	total := totalGearRatios(gears)
+	return total
+}
+
+func totalGearRatios(gears []Gear) int {
+	total := 0
+	for _, gear := range gears {
+		if gear.count != 2 {
+			continue
+		}
+		total += gear.values[0] * gear.values[1]
+	}
+	return total
+}
+
+func gearCountAndTotal(parts []Part, gears []Gear) []Gear {
+	var updatedGears = []Gear{}
+	for _, gear := range gears {
+		for _, part := range parts {
+			if !part.nearGear {
+				continue
+			}
+
+			if gear.x >= part.scanXStart && gear.x <= part.scanXEnd-1 {
+				if gear.y >= part.scanYStart && gear.y <= part.scanYEnd {
+					gear.count += 1
+					gear.values = append(gear.values, part.value)
+				}
+			}
+		}
+		updatedGears = append(updatedGears, gear)
+	}
+	return updatedGears
+}
+
+func findGears(lines []string) []Gear {
+	gears := []Gear{}
+
+	for y, line := range lines {
+		re := regexp.MustCompile("\\*")
+		idx := re.FindAllStringIndex(line, -1)
+		for _, j := range idx {
+			gear := Gear{x: j[0], y: y}
+			gears = append(gears, gear)
+		}
+	}
+	return gears
 }
 
 func calculateTotal(parts []Part) int {
@@ -86,6 +150,20 @@ func validate(parts []Part, lines []string) []Part {
 					continue
 				}
 				part.valid = true
+			}
+		}
+		parts[index] = part
+	}
+	return parts
+}
+
+func nearGear(parts []Part, lines []string) []Part {
+	for index, part := range parts {
+		for i := part.scanYStart; i <= part.scanYEnd; i++ {
+			for j := part.scanXStart; j < part.scanXEnd; j++ {
+				if string(lines[i][j]) == "*" {
+					part.nearGear = true
+				}
 			}
 		}
 		parts[index] = part
