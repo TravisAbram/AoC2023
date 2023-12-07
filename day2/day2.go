@@ -8,13 +8,13 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	// "unicode"
 )
 
 func main() {
 	fileLines := getLines("input2")
 
 	fmt.Println("Part 1:", part1(fileLines))
+	fmt.Println("Part 2:", part2(fileLines))
 }
 
 func part1(lines []string) int {
@@ -40,6 +40,40 @@ func part1(lines []string) int {
 	}
 
 	return total
+}
+
+func part2(lines []string) int {
+	total := 0
+
+	for _, line := range lines {
+		line = strings.Split(line, ":")[1]
+		games := strings.Split(line, ";")
+		values := []int{0, 0, 0}
+
+		for _, game := range games {
+			colors := parseGame(game)
+			values = findValues(values, colors)
+
+		}
+		total += multiplyColors(values)
+	}
+	return total
+}
+
+func multiplyColors(colors []int) int {
+	return colors[0] * colors[1] * colors[2]
+}
+
+func findValues(previous []int, current []int) []int {
+	updatedValues := []int{0, 0, 0}
+	for i := 0; i < 3; i++ {
+		if previous[i] < current[i] {
+			updatedValues[i] = current[i]
+		} else {
+			updatedValues[i] = previous[i]
+		}
+	}
+	return updatedValues
 }
 
 func possible(values []int, maxValues []int) bool {
