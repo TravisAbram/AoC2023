@@ -46,22 +46,20 @@ func sumPoints(cards []Card) int {
 }
 
 func calculatePoints(cards []Card) []Card {
-	cardsWithPoints := []Card{}
-	for _, card := range cards {
+	for i, card := range cards {
 		if len(card.matches) == 0 {
 			card.points = 0
 		} else {
 			card.points = int(math.Pow(2, float64(len(card.matches))-1))
 		}
-		cardsWithPoints = append(cardsWithPoints, card)
+		cards[i] = card
 	}
-	return cardsWithPoints
+	return cards
 }
 
 func findMatches(cards []Card) []Card {
-	cardsWithMatches := []Card{}
 	winningPattern := regexp.MustCompile(`\s+`)
-	for _, card := range cards {
+	for i, card := range cards {
 		winningRegex := `\b` + winningPattern.ReplaceAllString(card.winning, `\b|\b`) + `\b`
 		pattern := regexp.MustCompile(winningRegex)
 		matches := pattern.FindAllString(card.chosen, -1)
@@ -69,9 +67,9 @@ func findMatches(cards []Card) []Card {
 			matchInt, _ := strconv.Atoi(match)
 			card.matches = append(card.matches, matchInt)
 		}
-		cardsWithMatches = append(cardsWithMatches, card)
+		cards[i] = card
 	}
-	return cardsWithMatches
+	return cards
 }
 
 func parseTickets(lines []string) []Card {
