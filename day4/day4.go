@@ -2,18 +2,12 @@ package main
 
 import (
 	"bufio"
-	"regexp"
-
-	// "unicode"
-	// "errors"
 	"fmt"
 	"log"
-	"os"
-	// "regexp"
 	"math"
+	"os"
+	"regexp"
 	"strconv"
-	// "unicode"
-	// "strings"
 )
 
 type Card struct {
@@ -21,6 +15,7 @@ type Card struct {
 	chosen  string
 	matches []int
 	points  int
+	copies  int
 }
 
 func main() {
@@ -35,6 +30,38 @@ func part1(lines []string) int {
 	cards = findMatches(cards)
 	cards = calculatePoints(cards)
 	return sumPoints(cards)
+}
+
+func part2(lines []string) int {
+	cards := parseTickets(lines)
+	cards = findMatches(cards)
+	cards = calculateCopies(cards)
+	return sumCopies(cards)
+}
+
+func calculateCopies(cards []Card) []Card {
+	for i := 0; i < len(cards); i++ {
+		cards[i].copies = 1
+	}
+
+	for i, card := range cards {
+		wins := len(card.matches)
+
+		for k := 0; k < cards[i].copies; k++ {
+			for j := 0; j < wins; j++ {
+				cards[i+j+1].copies += 1
+			}
+		}
+	}
+	return cards
+}
+
+func sumCopies(cards []Card) int {
+	var sum int
+	for _, card := range cards {
+		sum += card.copies
+	}
+	return sum
 }
 
 func sumPoints(cards []Card) int {
@@ -81,11 +108,6 @@ func parseTickets(lines []string) []Card {
 		cards[i].chosen = matches[2]
 	}
 	return cards
-}
-
-func part2(lines []string) int {
-	total := 0
-	return total
 }
 
 func getLines(file string) []string {
